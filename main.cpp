@@ -1,5 +1,6 @@
 #include "RunMap.h"
 #include <iostream>
+#include <cstdlib>
 
 int main()
 {
@@ -30,7 +31,7 @@ int main()
     
     Map* gameMap = new Map();
 
-    gameMap->createTestMap();
+    gameMap->generateMap();
     gameMap->drawMap();
 
     delete gameMap;
