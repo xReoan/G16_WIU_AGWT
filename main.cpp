@@ -1,6 +1,15 @@
+#include "RunMap.h"
 #include <iostream>
 
-int main() {
+int main()
+{
+    Map* gameMap = new Map();
 
-	return 0;
+    gameMap->createTestMap();
+    gameMap->drawMap();
+
+    delete gameMap;
+    gameMap = nullptr;
+
+    return 0;
 }
