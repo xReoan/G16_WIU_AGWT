@@ -1,5 +1,6 @@
 #pragma once
 #include "MapNode.h"
+#include "MapRNG.h"
 
 class Map
 {
@@ -13,6 +14,8 @@ private:
     // Stores the node the player is currently standing on.
     MapNode* currentNode;
 
+    MapRNG mapRNG;
+
 public:
     // Constructor.
     Map();
@@ -21,8 +24,8 @@ public:
     // Deletes all dynamically created MapNode objects.
     ~Map();
 
-    // Creates a temporary test map.
-    void createTestMap();
+    // Creates a rand map.
+    void generateMap();
 
     // Draws the map in the console.
     void drawMap();
