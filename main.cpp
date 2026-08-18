@@ -1,11 +1,13 @@
 #include "RunMap.h"
 #include <iostream>
+#include <cstdlib>
 
 int main()
 {
+    srand(time(0));
     Map* gameMap = new Map();
 
-    gameMap->createTestMap();
+    gameMap->generateMap();
     gameMap->drawMap();
 
     delete gameMap;
