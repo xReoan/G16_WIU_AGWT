@@ -38,32 +38,41 @@ Map::~Map()
 //          [F]   [S]
 //            \   /
 //           [START]
-void Map::createTestMap()
+void Map::generateMap()
 {
-    // Bottom node.
+    // The first node is always a Fight.
+    // This prevents the player from immediately
+    // starting at a Shop or Backpack.
     nodes[0] = new MapNode(FIGHT, 400, 500);
 
     // Second row.
-    nodes[1] = new MapNode(FIGHT, 300, 400);
-    nodes[2] = new MapNode(SHOP, 500, 400);
+    nodes[1] = new MapNode(
+        mapRNG.generateNodeType(), 300, 400);
+
+    nodes[2] = new MapNode(
+        mapRNG.generateNodeType(), 500, 400);
 
     // Middle node.
-    nodes[3] = new MapNode(BACKPACK, 400, 300);
+    nodes[3] = new MapNode(
+        mapRNG.generateNodeType(), 400, 300);
 
     // Fourth row.
-    nodes[4] = new MapNode(SHOP, 300, 200);
-    nodes[5] = new MapNode(FIGHT, 500, 200);
+    nodes[4] = new MapNode(
+        mapRNG.generateNodeType(), 300, 200);
 
-    // Final node.
+    nodes[5] = new MapNode(
+        mapRNG.generateNodeType(), 500, 200);
+
+    // Final node is always a Fight.
     nodes[6] = new MapNode(FIGHT, 400, 100);
 
     nodeCount = 7;
 
-    // Connect bottom node to the second row.
+    // Connect the first node to both branches.
     nodes[0]->setLeftPath(nodes[1]);
     nodes[0]->setRightPath(nodes[2]);
 
-    // Merge both paths into the middle node.
+    // Merge into the middle.
     nodes[1]->setRightPath(nodes[3]);
     nodes[2]->setLeftPath(nodes[3]);
 
@@ -71,20 +80,16 @@ void Map::createTestMap()
     nodes[3]->setLeftPath(nodes[4]);
     nodes[3]->setRightPath(nodes[5]);
 
-    // Merge into the final node.
+    // Merge into the final Fight.
     nodes[4]->setRightPath(nodes[6]);
     nodes[5]->setLeftPath(nodes[6]);
 
-    // Player begins at the bottom node.
+    // Start at the bottom.
     currentNode = nodes[0];
 
     currentNode->setVisited(true);
 }
 
-// Draws the current test map.
-//
-// This is hard-coded visually for now.
-// Later, the 2D renderer will use each node's x and y position.
 void Map::drawMap()
 {
     std::cout << std::endl;
@@ -124,6 +129,8 @@ void Map::drawMap()
     std::cout << "F = Fight" << std::endl;
     std::cout << "S = Shop" << std::endl;
     std::cout << "B = Backpack" << std::endl;
+
+    std::cout << "Q = Stand Up From Table" << std::endl;
 }
 
 // Returns the node the player is currently standing on.
