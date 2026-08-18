@@ -23,7 +23,8 @@ int main()
                  ""     ""    ""  """"""""  ""    ""  ""
 	)" << std::endl;;
     system("pause");
-
+	system("cls");
+	
     //then the fuctions below
 	return 0;
     
