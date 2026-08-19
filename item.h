@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-using namespace std;
+//using namespace std;
 class item
 {
 public:
@@ -14,9 +14,9 @@ public:
 		projectile,
 		none
 	};
-	item(string name, string description, itemtype itemcategory, combattype combatcategory, int attackvalue, int defensevalue, int healvalue, int duration, int price);
-	string getname();
-	string getdescription();
+	item(std::string name, std::string description, itemtype itemcategory, combattype combatcategory, int attackvalue, int defensevalue, int healvalue, int duration, int price);
+	std::string getname();
+	std::string getdescription();
 	itemtype getitemcategory();
 	combattype getcombatcategory();
 	int getattackvalue();
@@ -25,8 +25,8 @@ public:
 	int getduration();
 	int getprice();
 private:
-	string itemname;
-	string itemdescription;
+	std::string itemname;
+	std::string itemdescription;
 	itemtype itemcategory;	
 	combattype combatcategory;	
 	int attackvalue;
