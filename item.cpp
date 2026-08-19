@@ -1,6 +1,6 @@
 #include "item.h"
 
-item::item(string name, string description, itemtype itemcategory, combattype combatcategory, int attackvalue, int defensevalue, int healvalue, int duration, int price) {
+item::item(std::string name, std::string description, itemtype itemcategory, combattype combatcategory, int attackvalue, int defensevalue, int healvalue, int duration, int price) {
 	this->itemname = name;
 	this->itemdescription = description;
 	this->itemcategory = itemcategory;
@@ -11,11 +11,11 @@ item::item(string name, string description, itemtype itemcategory, combattype co
 	this->duration = duration;
 }
 
-string item::getname() {
+std::string item::getname() {
 	return itemname;
 }
 
-string item::getdescription() {
+std::string item::getdescription() {
 	return itemdescription;
 }
 
