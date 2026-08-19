@@ -7,24 +7,32 @@ public:
 	enum class itemtype {
 		weapon,
 		armor,
-		consumable,
+		consumable
 	};
 	enum class combattype {
 		melee,
 		projectile,
-		none,
+		none
 	};
-	item(string name, string description, itemtype itemcategory, combattype combatcategory, int value);
+	item(string name, string description, itemtype itemcategory, combattype combatcategory, int attackvalue, int defensevalue, int healvalue, int duration, int price);
 	string getname();
 	string getdescription();
-	int getvalue();
 	itemtype getitemcategory();
 	combattype getcombatcategory();
+	int getattackvalue();
+	int getdefensevalue();
+	int gethealvalue();
+	int getduration();
+	int getprice();
 private:
-	string name;
-	string description;
+	string itemname;
+	string itemdescription;
 	itemtype itemcategory;	
-	combattype combatcategory;
-	int value;	
+	combattype combatcategory;	
+	int attackvalue;
+	int defensevalue;
+	int healvalue;
+	int duration;
+	int price;
 };
 
