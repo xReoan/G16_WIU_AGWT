@@ -1,64 +1,48 @@
-#pragma once
+#include "item.h"
 
-#include "MapNode.h"
-#include "MapRNG.h"
+item::item(std::string name, std::string description, itemtype itemcategory, combattype combatcategory, int attackvalue, int defensevalue, int healvalue, int duration, int price) {
+	this->itemname = name;
+	this->itemdescription = description;
+	this->itemcategory = itemcategory;
+	this->combatcategory = combatcategory;
+	this->attackvalue = attackvalue;
+	this->defensevalue = defensevalue;
+	this->healvalue = healvalue;
+	this->duration = duration;
+}
 
-// Stores which path the player
-// is currently selecting.
-enum PathChoice
-{
-    NO_PATH,
-    LEFT_PATH,
-    RIGHT_PATH
-};
+std::string item::getname() {
+	return itemname;
+}
 
-class Map
-{
-private:
-    MapNode* nodes[7];
+std::string item::getdescription() {
+	return itemdescription;
+}
 
-    int nodeCount;
+int item::getattackvalue() {
+	return attackvalue;
+}
 
-    // Node the player is currently standing on.
-    MapNode* currentNode;
+int item::getdefensevalue() {
+	return defensevalue;
+}
 
-    // Path currently highlighted by A/D.
-    PathChoice selectedPath;
+int item::gethealvalue() {
+	return healvalue;
+}
 
-    // Generates random node types.
-    MapRNG mapRNG;
+int item::getduration() {
+	return duration;
+}
 
-public:
-    Map();
+int item::getprice() {
+	return price;
+}
 
-    ~Map();
+item::itemtype item::getitemcategory() {
+	return itemcategory;
+}
 
-    // Creates the randomized map.
-    void generateMap();
-
-    // Draws the map.
-    void drawMap();
-
-    // Selects a path without travelling yet.
-    void selectLeft();
-    void selectRight();
-
-    // Travels along the currently selected path.
-    //
-    // Returns true if movement happened.
-    bool travelSelected();
-
-    // Returns the node currently selected.
-    MapNode* getSelectedNode();
-
-    // Returns the node the player
-    // is currently standing on.
-    MapNode* getCurrentNode();
-
-    // Returns selected path.
-    PathChoice getSelectedPath();
-
-    // Checks whether player reached
-    // the final node.
-    bool isAtFinalNode();
-};
+item::combattype item::getcombatcategory() {
+	return combatcategory;
+}
