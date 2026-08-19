@@ -1,48 +1,64 @@
-#include "item.h"
+#pragma once
 
-item::item(std::string name, std::string description, itemtype itemcategory, combattype combatcategory, int attackvalue, int defensevalue, int healvalue, int duration, int price) {
-	this->itemname = name;
-	this->itemdescription = description;
-	this->itemcategory = itemcategory;
-	this->combatcategory = combatcategory;
-	this->attackvalue = attackvalue;
-	this->defensevalue = defensevalue;
-	this->healvalue = healvalue;
-	this->duration = duration;
-}
+#include "MapNode.h"
+#include "MapRNG.h"
 
-std::string item::getname() {
-	return itemname;
-}
+// Stores which path the player
+// is currently selecting.
+enum PathChoice
+{
+    NO_PATH,
+    LEFT_PATH,
+    RIGHT_PATH
+};
 
-std::string item::getdescription() {
-	return itemdescription;
-}
+class Map
+{
+private:
+    MapNode* nodes[7];
 
-int item::getattackvalue() {
-	return attackvalue;
-}
+    int nodeCount;
 
-int item::getdefensevalue() {
-	return defensevalue;
-}
+    // Node the player is currently standing on.
+    MapNode* currentNode;
 
-int item::gethealvalue() {
-	return healvalue;
-}
+    // Path currently highlighted by A/D.
+    PathChoice selectedPath;
 
-int item::getduration() {
-	return duration;
-}
+    // Generates random node types.
+    MapRNG mapRNG;
 
-int item::getprice() {
-	return price;
-}
+public:
+    Map();
 
-item::itemtype item::getitemcategory() {
-	return itemcategory;
-}
+    ~Map();
 
-item::combattype item::getcombatcategory() {
-	return combatcategory;
-}
+    // Creates the randomized map.
+    void generateMap();
+
+    // Draws the map.
+    void drawMap();
+
+    // Selects a path without travelling yet.
+    void selectLeft();
+    void selectRight();
+
+    // Travels along the currently selected path.
+    //
+    // Returns true if movement happened.
+    bool travelSelected();
+
+    // Returns the node currently selected.
+    MapNode* getSelectedNode();
+
+    // Returns the node the player
+    // is currently standing on.
+    MapNode* getCurrentNode();
+
+    // Returns selected path.
+    PathChoice getSelectedPath();
+
+    // Checks whether player reached
+    // the final node.
+    bool isAtFinalNode();
+};
