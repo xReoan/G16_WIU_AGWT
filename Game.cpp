@@ -4,7 +4,20 @@
 #include <conio.h>
 #include <Windows.h>
 
+// =====================================
+// CONSTRUCTOR
+// =====================================
+
+// IMPORTANT:
+//
+// Room no longer has a default constructor.
+//
+// : room(1)
+//
+// tells C++:
+// "Construct room as Room 1."
 Game::Game()
+    : room(1)
 {
     currentState = ROOM_STATE;
 
@@ -15,7 +28,10 @@ Game::Game()
     map.generateMap();
 }
 
-// Moves cursor back to top-left.
+// =====================================
+// CONSOLE
+// =====================================
+
 void Game::moveCursorToTop()
 {
     HANDLE consoleHandle =
@@ -32,7 +48,6 @@ void Game::moveCursorToTop()
         cursorPosition);
 }
 
-// Completely clears console.
 void Game::clearScreen()
 {
     HANDLE consoleHandle =
@@ -76,7 +91,10 @@ void Game::clearScreen()
         topLeft);
 }
 
-// Main loop.
+// =====================================
+// MAIN LOOP
+// =====================================
+
 void Game::run()
 {
     while (true)
@@ -101,13 +119,13 @@ void Game::run()
     }
 }
 
-// Draws current state.
+// =====================================
+// DRAW
+// =====================================
+
 void Game::draw()
 {
-    // ==========================
     // ROOM
-    // ==========================
-
     if (currentState == ROOM_STATE)
     {
         room.drawRoom(
@@ -116,10 +134,7 @@ void Game::draw()
             false);
     }
 
-    // ==========================
     // MAP
-    // ==========================
-
     else if (currentState == MAP_STATE)
     {
         map.drawMap();
@@ -139,10 +154,7 @@ void Game::draw()
             << std::endl;
     }
 
-    // ==========================
-    // FIGHT
-    // ==========================
-
+    // CARD BATTLE
     else if (
         currentState ==
         CARD_BATTLE_STATE)
@@ -153,7 +165,8 @@ void Game::draw()
 
         std::cout << std::endl;
 
-        if (map.isAtFinalNode() == true)
+        if (map.isAtFinalNode()
+            == true)
         {
             std::cout
                 << "BOSS BATTLE"
@@ -174,16 +187,12 @@ void Game::draw()
 
         std::cout << std::endl;
 
-        // Temporary testing control.
         std::cout
             << "E - Win Battle (TEST)"
             << std::endl;
     }
 
-    // ==========================
     // SHOP
-    // ==========================
-
     else if (
         currentState ==
         SHOP_STATE)
@@ -201,20 +210,11 @@ void Game::draw()
         std::cout << std::endl;
 
         std::cout
-            << "Shop system will go here later."
-            << std::endl;
-
-        std::cout << std::endl;
-
-        std::cout
             << "Q - Leave Shop"
             << std::endl;
     }
 
-    // ==========================
     // BACKPACK
-    // ==========================
-
     else if (
         currentState ==
         BACKPACK_STATE)
@@ -232,12 +232,6 @@ void Game::draw()
         std::cout << std::endl;
 
         std::cout
-            << "Something useful may be inside."
-            << std::endl;
-
-        std::cout << std::endl;
-
-        std::cout
             << "E - Take Item"
             << std::endl;
 
@@ -246,70 +240,77 @@ void Game::draw()
             << std::endl;
     }
 
-    // ==========================
     // PUZZLE
-    // ==========================
-
     else if (
         currentState ==
         PUZZLE_STATE)
     {
         if (activePuzzle != nullptr)
         {
-            // Polymorphism.
+            // POLYMORPHISM:
+            //
+            // Room 1:
+            // KeypadPuzzle::draw()
+            //
+            // Room 2:
+            // ClockPuzzle::draw()
             activePuzzle->draw();
         }
     }
 }
 
-// Sends input to correct state.
+// =====================================
+// HANDLE INPUT
+// =====================================
+
 void Game::handleInput(
     char input)
 {
-    if (currentState == ROOM_STATE)
+    if (currentState ==
+        ROOM_STATE)
     {
         handleRoomInput(input);
     }
 
-    else if (currentState == MAP_STATE)
+    else if (currentState ==
+        MAP_STATE)
     {
         handleMapInput(input);
     }
 
-    else if (
-        currentState ==
+    else if (currentState ==
         CARD_BATTLE_STATE)
     {
         handleCardBattleInput(input);
     }
 
-    else if (
-        currentState ==
+    else if (currentState ==
         SHOP_STATE)
     {
         handleShopInput(input);
     }
 
-    else if (
-        currentState ==
+    else if (currentState ==
         BACKPACK_STATE)
     {
         handleBackpackInput(input);
     }
 
-    else if (
-        currentState ==
+    else if (currentState ==
         PUZZLE_STATE)
     {
         handlePuzzleInput(input);
     }
 }
 
-// Room controls.
+// =====================================
+// ROOM INPUT
+// =====================================
+
 void Game::handleRoomInput(
     char input)
 {
-    // Movement.
+    // WASD movement.
     if (input == 'W' ||
         input == 'w' ||
         input == 'A' ||
@@ -324,7 +325,7 @@ void Game::handleRoomInput(
             &room);
     }
 
-    // Interaction.
+    // E = Interact.
     else if (
         input == 'E' ||
         input == 'e')
@@ -334,11 +335,13 @@ void Game::handleRoomInput(
 
         if (object != nullptr)
         {
-            // POLYMORPHISM.
             InteractionResult result =
                 object->interact();
 
-            // Card Table.
+            // ========================
+            // CARD TABLE
+            // ========================
+
             if (result == OPEN_MAP)
             {
                 std::cout << std::endl;
@@ -360,49 +363,76 @@ void Game::handleRoomInput(
                     true;
             }
 
-            // Puzzle.
+            // ========================
+            // PUZZLE
+            // ========================
+
             else if (
                 result ==
                 OPEN_PUZZLE)
             {
+                // Generic!
+                //
+                // Room 1 returns KeypadPuzzle.
+                // Room 2 returns ClockPuzzle.
                 activePuzzle =
-                    room.getKeypadPuzzle();
+                    room.getPuzzle();
 
-                room.getKeypadPuzzle()->
-                    clearEnteredCode();
+                if (activePuzzle != nullptr)
+                {
+                    activePuzzle->
+                        setExitRequested(false);
 
-                activePuzzle->
-                    setExitRequested(false);
+                    currentState =
+                        PUZZLE_STATE;
 
-                currentState =
-                    PUZZLE_STATE;
-
-                screenNeedsClear =
-                    true;
+                    screenNeedsClear =
+                        true;
+                }
             }
 
-            // Door.
+            // ========================
+            // OPEN DOOR
+            // ========================
+
             else if (
                 result ==
                 OPEN_DOOR)
             {
-                std::cout << std::endl;
+                clearScreen();
 
                 std::cout
                     << "The door opens."
                     << std::endl;
 
+                std::cout << std::endl;
+
                 std::cout
-                    << "Room 1 complete!"
+                    << "Room "
+                    << room.getRoomNumber()
+                    << " complete!"
+                    << std::endl;
+
+                std::cout << std::endl;
+
+                std::cout
+                    << "Press any key to continue."
                     << std::endl;
 
                 _getch();
+
+                // NEW:
+                // Go to the next room.
+                goToNextRoom();
 
                 screenNeedsClear =
                     true;
             }
 
-            // Locked object.
+            // ========================
+            // LOCKED
+            // ========================
+
             else if (
                 result ==
                 LOCKED)
@@ -422,9 +452,12 @@ void Game::handleRoomInput(
     }
 }
 
-// Finds interactable directly
-// in front of Player.
-Interactable* Game::getPlayerInteractable()
+// =====================================
+// PLAYER INTERACTION POSITION
+// =====================================
+
+Interactable*
+Game::getPlayerInteractable()
 {
     int interactionX =
         player.getX();
@@ -460,21 +493,21 @@ Interactable* Game::getPlayerInteractable()
         interactionY);
 }
 
-// ================================
-// MAP CONTROLS
-// ================================
+// =====================================
+// MAP
+// =====================================
 
 void Game::handleMapInput(
     char input)
 {
-    // A selects left.
+    // Select left path.
     if (input == 'A' ||
         input == 'a')
     {
         map.selectLeft();
     }
 
-    // D selects right.
+    // Select right path.
     else if (
         input == 'D' ||
         input == 'd')
@@ -482,14 +515,13 @@ void Game::handleMapInput(
         map.selectRight();
     }
 
-    // E confirms selected path.
+    // Confirm path.
     else if (
         input == 'E' ||
         input == 'e')
     {
-        // Only continue if a valid
-        // path was actually selected.
-        if (map.travelSelected() == true)
+        if (map.travelSelected()
+            == true)
         {
             activateCurrentMapNode();
 
@@ -498,7 +530,7 @@ void Game::handleMapInput(
         }
     }
 
-    // Q stands up.
+    // Stand up.
     else if (
         input == 'Q' ||
         input == 'q')
@@ -523,8 +555,10 @@ void Game::handleMapInput(
     }
 }
 
-// Checks which node the player
-// just travelled onto.
+// =====================================
+// ACTIVATE MAP NODE
+// =====================================
+
 void Game::activateCurrentMapNode()
 {
     MapNode* node =
@@ -538,21 +572,18 @@ void Game::activateCurrentMapNode()
     NodeType type =
         node->getType();
 
-    // Fight.
     if (type == FIGHT)
     {
         currentState =
             CARD_BATTLE_STATE;
     }
 
-    // Shop.
     else if (type == SHOP)
     {
         currentState =
             SHOP_STATE;
     }
 
-    // Backpack.
     else if (type == BACKPACK)
     {
         currentState =
@@ -560,26 +591,34 @@ void Game::activateCurrentMapNode()
     }
 }
 
-// ================================
+// =====================================
 // CARD BATTLE
-// ================================
+// =====================================
 
 void Game::handleCardBattleInput(
     char input)
 {
     // TEMPORARY:
-    //
-    // Press E to pretend the player
-    // won the battle.
+    // E automatically wins.
     if (input == 'E' ||
         input == 'e')
     {
-        // If this was the final node,
-        // treat it as Room 1's boss.
-        if (map.isAtFinalNode() == true)
+        if (map.isAtFinalNode()
+            == true)
         {
-            // Boss defeated!
-            room.setKeypadUnlocked(true);
+            // ============================
+            // ROOM 1 BOSS
+            // ============================
+
+            if (room.getRoomNumber() == 1)
+            {
+                // Unlock Room 1's Keypad.
+                //
+                // This replaces the OLD:
+                //
+                // setKeypadUnlocked()
+                room.setPuzzleUnlocked(true);
+            }
 
             clearScreen();
 
@@ -595,13 +634,23 @@ void Game::handleCardBattleInput(
 
             std::cout << std::endl;
 
-            std::cout
-                << "Somewhere behind you..."
-                << std::endl;
+            // Room 1 reveals the Keypad code.
+            if (room.getRoomNumber() == 1)
+            {
+                std::cout
+                    << "You remember the code: '9473'"
+                    << std::endl;
+            }
 
-            std::cout
-                << "you remember the code: '9743'"
-                << std::endl;
+            // Room 2 Clock is already unlocked,
+            // so the boss does not need to unlock it.
+            else if (
+                room.getRoomNumber() == 2)
+            {
+                std::cout
+                    << "The room falls silent."
+                    << std::endl;
+            }
 
             std::cout << std::endl;
 
@@ -612,7 +661,6 @@ void Game::handleCardBattleInput(
             _getch();
         }
 
-        // Return to progression map.
         currentState =
             MAP_STATE;
 
@@ -621,9 +669,9 @@ void Game::handleCardBattleInput(
     }
 }
 
-// ================================
+// =====================================
 // SHOP
-// ================================
+// =====================================
 
 void Game::handleShopInput(
     char input)
@@ -639,14 +687,13 @@ void Game::handleShopInput(
     }
 }
 
-// ================================
+// =====================================
 // BACKPACK
-// ================================
+// =====================================
 
 void Game::handleBackpackInput(
     char input)
 {
-    // Temporary item collection.
     if (input == 'E' ||
         input == 'e')
     {
@@ -654,10 +701,6 @@ void Game::handleBackpackInput(
 
         std::cout
             << "You take the item from the backpack."
-            << std::endl;
-
-        std::cout
-            << "Inventory system will be added later."
             << std::endl;
 
         _getch();
@@ -669,7 +712,6 @@ void Game::handleBackpackInput(
             true;
     }
 
-    // Leave without taking item.
     else if (
         input == 'Q' ||
         input == 'q')
@@ -682,22 +724,31 @@ void Game::handleBackpackInput(
     }
 }
 
-// ================================
+// =====================================
 // PUZZLE
-// ================================
+// =====================================
 
 void Game::handlePuzzleInput(
     char input)
 {
     if (activePuzzle != nullptr)
     {
+        // Polymorphism:
+        //
+        // Keypad handles numbers.
+        // Clock handles WASD/E.
         activePuzzle->
             handleInput(input);
 
-        // Puzzle solved.
+        // ============================
+        // SOLVED
+        // ============================
+
         if (activePuzzle->
             getSolved() == true)
         {
+            // Both Room 1 and Room 2
+            // puzzles unlock their exit door.
             room.setDoorUnlocked(true);
 
             clearScreen();
@@ -709,6 +760,8 @@ void Game::handlePuzzleInput(
             std::cout
                 << "The exit door has been unlocked."
                 << std::endl;
+
+            std::cout << std::endl;
 
             std::cout
                 << "Press any key to continue."
@@ -726,7 +779,10 @@ void Game::handlePuzzleInput(
                 true;
         }
 
-        // Q pressed.
+        // ============================
+        // Q = LEAVE
+        // ============================
+
         else if (
             activePuzzle->
             getExitRequested() == true)
@@ -743,5 +799,88 @@ void Game::handlePuzzleInput(
             screenNeedsClear =
                 true;
         }
+    }
+}
+
+// =====================================
+// ROOM TRANSITION
+// =====================================
+
+void Game::goToNextRoom()
+{
+    int currentRoomNumber =
+        room.getRoomNumber();
+
+    // ============================
+    // ROOM 1 -> ROOM 2
+    // ============================
+
+    if (currentRoomNumber == 1)
+    {
+        // Turn our existing Room object
+        // into Room 2.
+        room.loadRoom(2);
+
+        // Reset player to starting point.
+        player.resetPosition();
+
+        // Generate a new progression map
+        // for Room 2.
+        map.generateMap();
+
+        activePuzzle = nullptr;
+
+        currentState =
+            ROOM_STATE;
+
+        clearScreen();
+
+        std::cout
+            << "You step through the doorway..."
+            << std::endl;
+
+        std::cout << std::endl;
+
+        std::cout
+            << "Something feels different here."
+            << std::endl;
+
+        std::cout << std::endl;
+
+        std::cout
+            << "Press any key to enter Room 2."
+            << std::endl;
+
+        _getch();
+    }
+
+    // ============================
+    // ROOM 2 -> ROOM 3
+    // ============================
+
+    else if (currentRoomNumber == 2)
+    {
+        clearScreen();
+
+        std::cout
+            << "Room 2 complete!"
+            << std::endl;
+
+        std::cout << std::endl;
+
+        std::cout
+            << "Room 3 has not been created yet."
+            << std::endl;
+
+        std::cout << std::endl;
+
+        std::cout
+            << "Press any key to continue."
+            << std::endl;
+
+        _getch();
+
+        currentState =
+            ROOM_STATE;
     }
 }

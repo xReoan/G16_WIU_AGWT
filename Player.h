@@ -5,12 +5,9 @@
 class Player
 {
 private:
-    // Player's current position inside the room.
     int x;
     int y;
 
-    // Direction the player is currently facing.
-    //
     // W = Up
     // A = Left
     // S = Down
@@ -18,16 +15,16 @@ private:
     char facingDirection;
 
 public:
-    // Constructor.
     Player();
 
-    // Attempts to move the player one space.
-    //
-    // The Room checks whether the destination
-    // can actually be walked on.
+    // Moves the player if the new position
+    // is walkable.
     void move(char direction, Room* room);
 
-    // Getter functions.
+    // Returns player to the starting position
+    // when entering a new room.
+    void resetPosition();
+
     int getX();
     int getY();
 

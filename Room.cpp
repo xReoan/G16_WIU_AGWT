@@ -2,67 +2,44 @@
 
 #include <iostream>
 
-// Creates Room 1.
-Room::Room()
+// =====================================
+// CONSTRUCTOR
+// =====================================
+
+Room::Room(int number)
 {
-    roomNumber = 1;
+    roomNumber = number;
 
     interactableCount = 0;
 
-    keypad = nullptr;
+    cardTable = nullptr;
+    puzzle = nullptr;
     exitDoor = nullptr;
 
-    // Give every pointer a safe value first.
     for (int i = 0; i < 10; i++)
     {
         interactables[i] = nullptr;
     }
 
-    // --------------------------------
-    // CARD TABLE
-    // --------------------------------
+    createRoomObjects();
 
-    CardTable* cardTable =
-        new CardTable(
-            16,
-            7,
-            18,
-            5);
-
-    addInteractable(cardTable);
-
-    // --------------------------------
-    // KEYPAD
-    // --------------------------------
-
-    keypad =
-        new KeypadPuzzle(
-            39,
-            2);
-
-    keypad->setUnlocked(true);
-
-    addInteractable(keypad);
-
-    // --------------------------------
-    // EXIT DOOR
-    // --------------------------------
-
-    exitDoor =
-        new Door(
-            39,
-            4);
-
-    exitDoor->setUnlocked(false);
-
-    addInteractable(exitDoor);
-
-    // Build Room 1.
     createRoom();
 }
 
-// Deletes all objects that Room created.
+// =====================================
+// DESTRUCTOR
+// =====================================
+
 Room::~Room()
+{
+    clearInteractables();
+}
+
+// =====================================
+// DELETE CURRENT ROOM OBJECTS
+// =====================================
+
+void Room::clearInteractables()
 {
     for (int i = 0;
         i < interactableCount;
@@ -70,26 +47,51 @@ Room::~Room()
     {
         if (interactables[i] != nullptr)
         {
-            // Since Interactable has a
-            // virtual destructor, this safely
-            // deletes CardTable, KeypadPuzzle,
-            // Door, etc.
             delete interactables[i];
 
             interactables[i] = nullptr;
         }
     }
 
-    // keypad and exitDoor pointed to
-    // objects that were already deleted
-    // through interactables[].
-    //
-    // Do NOT delete them again.
-    keypad = nullptr;
+    interactableCount = 0;
+
+    // These pointers were pointing at objects
+    // that were just deleted above.
+    cardTable = nullptr;
+    puzzle = nullptr;
     exitDoor = nullptr;
+
+    for (int i = 0; i < 10; i++)
+    {
+        interactables[i] = nullptr;
+    }
 }
 
-// Adds an interactable to the room.
+// =====================================
+// LOAD NEW ROOM
+// =====================================
+
+void Room::loadRoom(int number)
+{
+    // Delete objects belonging
+    // to the old room.
+    clearInteractables();
+
+    // Change room number.
+    roomNumber = number;
+
+    // Create objects belonging
+    // to the new room.
+    createRoomObjects();
+
+    // Rebuild the UI.
+    createRoom();
+}
+
+// =====================================
+// ADD INTERACTABLE
+// =====================================
+
 void Room::addInteractable(
     Interactable* object)
 {
@@ -103,7 +105,91 @@ void Room::addInteractable(
     }
 }
 
-// Clears room UI.
+// =====================================
+// CREATE ROOM OBJECTS
+// =====================================
+
+void Room::createRoomObjects()
+{
+    // =====================================
+    // ROOM 1
+    // =====================================
+
+    if (roomNumber == 1)
+    {
+        // CARD TABLE
+        cardTable =
+            new CardTable(
+                16,
+                7,
+                18,
+                5);
+
+        addInteractable(cardTable);
+
+        // KEYPAD
+        puzzle =
+            new KeypadPuzzle(
+                39,
+                2);
+
+        // SHows
+        puzzle->setUnlocked(true);
+
+        addInteractable(puzzle);
+
+        // EXIT DOOR
+        exitDoor =
+            new Door(
+                39,
+                4);
+
+        exitDoor->setUnlocked(false);
+
+        addInteractable(exitDoor);
+    }
+
+    // =====================================
+    // ROOM 2
+    // =====================================
+
+    else if (roomNumber == 2)
+    {
+        // GRANDFATHER CLOCK
+        puzzle =
+            new ClockPuzzle(
+                3,
+                2);
+
+        // ClockPuzzle itself starts unlocked.
+        addInteractable(puzzle);
+
+        // EXIT DOOR
+        exitDoor =
+            new Door(
+                39,
+                2);
+
+        exitDoor->setUnlocked(false);
+
+        addInteractable(exitDoor);
+
+        // CARD TABLE
+        cardTable =
+            new CardTable(
+                15,
+                8,
+                20,
+                5);
+
+        addInteractable(cardTable);
+    }
+}
+
+// =====================================
+// CLEAR UI
+// =====================================
+
 void Room::clearRoom()
 {
     for (int y = 0;
@@ -119,10 +205,13 @@ void Room::clearRoom()
     }
 }
 
-// Draws outer walls.
+// =====================================
+// WALLS
+// =====================================
+
 void Room::drawWalls()
 {
-    // Top and bottom walls.
+    // Top and bottom.
     for (int x = 0;
         x < WIDTH;
         x++)
@@ -133,7 +222,7 @@ void Room::drawWalls()
             = '-';
     }
 
-    // Left and right walls.
+    // Left and right.
     for (int y = 0;
         y < HEIGHT;
         y++)
@@ -157,33 +246,52 @@ void Room::drawWalls()
         = '+';
 }
 
-// Draws the Card Table.
+// =====================================
+// CARD TABLE
+// =====================================
+
 void Room::drawTable()
 {
-    int startX = 16;
-    int startY = 7;
+    if (cardTable == nullptr)
+    {
+        return;
+    }
+
+    int startX =
+        cardTable->getX();
+
+    int startY =
+        cardTable->getY();
+
+    int width =
+        cardTable->getWidth();
+
+    int height =
+        cardTable->getHeight();
 
     // Top and bottom.
     for (int x = startX;
-        x <= startX + 17;
+        x < startX + width;
         x++)
     {
         roomLayout[startY][x]
             = '-';
 
-        roomLayout[startY + 4][x]
-            = '-';
+        roomLayout[
+            startY + height - 1][x]
+                = '-';
     }
 
-    // Left and right sides.
+    // Left and right.
     for (int y = startY;
-        y <= startY + 4;
+        y < startY + height;
         y++)
     {
         roomLayout[y][startX]
             = '|';
 
-        roomLayout[y][startX + 17]
+        roomLayout[y]
+            [startX + width - 1]
             = '|';
     }
 
@@ -191,70 +299,163 @@ void Room::drawTable()
     roomLayout[startY][startX]
         = '+';
 
-    roomLayout[startY][startX + 17]
+    roomLayout[startY]
+        [startX + width - 1]
         = '+';
 
-    roomLayout[startY + 4][startX]
+    roomLayout[startY + height - 1]
+        [startX]
         = '+';
 
-    roomLayout[startY + 4][startX + 17]
+    roomLayout[startY + height - 1]
+        [startX + width - 1]
         = '+';
 
-    const char tableText[] =
+    const char text[] =
         "CARD TABLE";
 
+    int textX =
+        startX +
+        (width - 10) / 2;
+
+    int textY =
+        startY +
+        height / 2;
+
     for (int i = 0;
-        tableText[i] != '\0';
+        text[i] != '\0';
         i++)
     {
-        roomLayout[startY + 2]
-            [startX + 4 + i]
-            = tableText[i];
+        roomLayout[textY]
+            [textX + i]
+            = text[i];
     }
 }
 
-// Draws keypad.
-void Room::drawKeypad()
+// =====================================
+// PUZZLE UI
+// =====================================
+
+void Room::drawPuzzle()
 {
-    int startX = 39;
-    int startY = 2;
-
-    if (keypad->getUnlocked()
-        == false)
+    if (puzzle == nullptr)
     {
-        const char text[] =
-            "[LOCKED]";
+        return;
+    }
 
-        for (int i = 0;
-            text[i] != '\0';
-            i++)
+    // =====================================
+    // ROOM 1 - KEYPAD
+    // =====================================
+
+    if (roomNumber == 1)
+    {
+        int startX =
+            puzzle->getX();
+
+        int startY =
+            puzzle->getY();
+
+        if (puzzle->getUnlocked()
+            == false)
         {
-            roomLayout[startY]
-                [startX + i]
-                = text[i];
+            const char text[] =
+                "[LOCKED]";
+
+            for (int i = 0;
+                text[i] != '\0';
+                i++)
+            {
+                roomLayout[startY]
+                    [startX + i]
+                    = text[i];
+            }
+        }
+        else
+        {
+            const char text[] =
+                "[KEYPAD]";
+
+            for (int i = 0;
+                text[i] != '\0';
+                i++)
+            {
+                roomLayout[startY]
+                    [startX + i]
+                    = text[i];
+            }
         }
     }
-    else
+
+    // =====================================
+    // ROOM 2 - GRANDFATHER CLOCK
+    // =====================================
+
+    else if (roomNumber == 2)
     {
-        const char text[] =
-            "[KEYPAD]";
+        int startX =
+            puzzle->getX();
+
+        int startY =
+            puzzle->getY();
+
+        const char line1[] =
+            "+-------------------+";
+
+        const char line2[] =
+            "| GRANDFATHER CLOCK |";
+
+        const char line3[] =
+            "|         O         |";
+
+        const char line4[] =
+            "|         |         |";
+
+        const char line5[] =
+            "+-------------------+";
 
         for (int i = 0;
-            text[i] != '\0';
+            line1[i] != '\0';
             i++)
         {
             roomLayout[startY]
                 [startX + i]
-                = text[i];
+                = line1[i];
+
+            roomLayout[startY + 1]
+                [startX + i]
+                = line2[i];
+
+            roomLayout[startY + 2]
+                [startX + i]
+                = line3[i];
+
+            roomLayout[startY + 3]
+                [startX + i]
+                = line4[i];
+
+            roomLayout[startY + 4]
+                [startX + i]
+                = line5[i];
         }
     }
 }
 
-// Draws exit door.
+// =====================================
+// DOOR
+// =====================================
+
 void Room::drawDoor()
 {
-    int startX = 39;
-    int startY = 4;
+    if (exitDoor == nullptr)
+    {
+        return;
+    }
+
+    int startX =
+        exitDoor->getX();
+
+    int startY =
+        exitDoor->getY();
 
     if (exitDoor->getUnlocked()
         == false)
@@ -287,51 +488,58 @@ void Room::drawDoor()
     }
 }
 
-// Draws other furniture.
+// =====================================
+// OTHER FURNITURE
+// =====================================
+
 void Room::drawFurniture()
 {
-    const char cabinetText[] =
-        "[CABINET]";
-
-    const char chairText[] =
-        "[CHAIR]";
-
-    // Cabinet.
-    for (int i = 0;
-        cabinetText[i] != '\0';
-        i++)
+    // Room 1 furniture.
+    if (roomNumber == 1)
     {
-        roomLayout[14][6 + i]
-            = cabinetText[i];
-    }
+        const char cabinet[] =
+            "[CABINET]";
 
-    // Chair.
-    for (int i = 0;
-        chairText[i] != '\0';
-        i++)
-    {
-        roomLayout[14][35 + i]
-            = chairText[i];
+        const char chair[] =
+            "[CHAIR]";
+
+        for (int i = 0;
+            cabinet[i] != '\0';
+            i++)
+        {
+            roomLayout[14][6 + i]
+                = cabinet[i];
+        }
+
+        for (int i = 0;
+            chair[i] != '\0';
+            i++)
+        {
+            roomLayout[14][35 + i]
+                = chair[i];
+        }
     }
 }
 
-// Rebuilds complete Room 1.
+// =====================================
+// BUILD ROOM
+// =====================================
+
 void Room::createRoom()
 {
     clearRoom();
 
     drawWalls();
-
-    drawTable();
-
-    drawKeypad();
-
+    drawPuzzle();
     drawDoor();
-
+    drawTable();
     drawFurniture();
 }
 
-// Displays Room 1.
+// =====================================
+// DISPLAY ROOM
+// =====================================
+
 void Room::drawRoom(
     int playerX,
     int playerY,
@@ -355,8 +563,6 @@ void Room::drawRoom(
             x < WIDTH;
             x++)
         {
-            // Player is drawn over the room,
-            // but isn't stored inside roomLayout.
             if (x == playerX &&
                 y == playerY &&
                 playerSeated == false)
@@ -386,12 +592,14 @@ void Room::drawRoom(
     std::cout << std::endl;
 }
 
-// Collision detection.
+// =====================================
+// COLLISION
+// =====================================
+
 bool Room::isWalkable(
     int x,
     int y)
 {
-    // Make sure position is inside room.
     if (x < 0 ||
         x >= WIDTH ||
         y < 0 ||
@@ -400,7 +608,7 @@ bool Room::isWalkable(
         return false;
     }
 
-    // Every Interactable blocks movement.
+    // All Interactables block movement.
     for (int i = 0;
         i < interactableCount;
         i++)
@@ -409,25 +617,28 @@ bool Room::isWalkable(
             != nullptr)
         {
             if (interactables[i]->
-                containsPosition(x, y))
+                containsPosition(
+                    x,
+                    y))
             {
                 return false;
             }
         }
     }
 
-    // Empty spaces can be walked on.
+    // Empty spaces are walkable.
     if (roomLayout[y][x] == ' ')
     {
         return true;
     }
 
-    // Walls and furniture block movement.
     return false;
 }
 
-// Searches for an Interactable
-// at a particular coordinate.
+// =====================================
+// INTERACTION DETECTION
+// =====================================
+
 Interactable* Room::getInteractableAt(
     int x,
     int y)
@@ -440,7 +651,9 @@ Interactable* Room::getInteractableAt(
             != nullptr)
         {
             if (interactables[i]->
-                containsPosition(x, y))
+                containsPosition(
+                    x,
+                    y))
             {
                 return interactables[i];
             }
@@ -450,52 +663,65 @@ Interactable* Room::getInteractableAt(
     return nullptr;
 }
 
-// Returns Room number.
+// =====================================
+// GETTERS / SETTERS
+// =====================================
+
 int Room::getRoomNumber()
 {
     return roomNumber;
 }
 
-// Returns keypad state.
-bool Room::getKeypadUnlocked()
+Puzzle* Room::getPuzzle()
 {
-    return keypad->getUnlocked();
+    return puzzle;
 }
 
-// Locks/unlocks keypad.
-void Room::setKeypadUnlocked(
+bool Room::getPuzzleUnlocked()
+{
+    if (puzzle != nullptr)
+    {
+        return puzzle->getUnlocked();
+    }
+
+    return false;
+}
+
+void Room::setPuzzleUnlocked(
     bool unlocked)
 {
-    keypad->setUnlocked(unlocked);
+    if (puzzle != nullptr)
+    {
+        puzzle->setUnlocked(
+            unlocked);
 
-    // Redraw [LOCKED] / [KEYPAD].
-    createRoom();
+        createRoom();
+    }
 }
 
-// Returns actual KeypadPuzzle.
-KeypadPuzzle* Room::getKeypadPuzzle()
-{
-    return keypad;
-}
-
-// Returns door state.
-bool Room::getDoorUnlocked()
-{
-    return exitDoor->getUnlocked();
-}
-
-// Locks/unlocks door.
-void Room::setDoorUnlocked(
-    bool unlocked)
-{
-    exitDoor->setUnlocked(unlocked);
-
-    // Redraw [LOCKED] / [ DOOR ].
-    createRoom();
-}
-
-// Returns actual Door.
 Door* Room::getDoor()
 {
     return exitDoor;
+}
+
+bool Room::getDoorUnlocked()
+{
+    if (exitDoor != nullptr)
+    {
+        return exitDoor->getUnlocked();
+    }
+
+    return false;
+}
+
+void Room::setDoorUnlocked(
+    bool unlocked)
+{
+    if (exitDoor != nullptr)
+    {
+        exitDoor->setUnlocked(
+            unlocked);
+
+        createRoom();
+    }
 }
