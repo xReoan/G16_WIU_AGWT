@@ -1,4 +1,9 @@
-#include "Player.h"
+#include "player.h"
+#include <iostream>
+Player::Player() : Entity(100,100,100) {
+	money = 0;
+	equippedweapon = nullptr;
+	equippedarmor = nullptr;
 
 Player::Player()
 {
@@ -15,6 +20,47 @@ void Player::resetPosition()
     facingDirection = 'W';
 }
 
+int Player::getmoney() {
+	return money;
+}
+
+item* Player::getweapon() {
+	return equippedweapon;
+}
+
+item* Player::getarmor() {
+	return equippedarmor;
+}
+
+void Player::equipweapon(item* weapon)
+{
+	if (weapon != nullptr && weapon->getitemcategory() == item::itemtype::weapon) {
+		equippedweapon = weapon;
+	}
+}
+
+void Player::equiparmor(item* armor)
+{
+	if (armor != nullptr && armor->getitemcategory() == item::itemtype::armor) {
+		equippedarmor = armor;
+	}
+}
+
+void Player::addmoney(int amount) {
+	money += amount;
+}
+
+bool Player::spendmoney(int amount) {
+	if (money >= amount) {
+		money -= amount;
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+// Attempts to move the player one position.
 void Player::move(char direction, Room* room)
 {
     int newX = x;
