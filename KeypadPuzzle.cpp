@@ -17,7 +17,7 @@ KeypadPuzzle::KeypadPuzzle(
     //
     // Later this can be the code
     // revealed after defeating the boss.
-    correctCode = "9743";
+    correctCode = "9473";
 
     wrongCode = false;
 }

@@ -14,14 +14,13 @@ private:
     int x;
     int y;
 
-    // Direction the player is currently facing.
-    //
     // W = Up
     // A = Left
     // S = Down
     // D = Right
     char facingDirection;
 public:
+    Player();
  	// Constructor.
 	Player();
 
@@ -35,13 +34,14 @@ public:
 	void equipweapon(item* weapon);
 	void equiparmor(item* armor);
 
-    // Attempts to move the player one space.
-    //
-    // The Room checks whether the destination
-    // can actually be walked on.
+    // Moves the player if the new position
+    // is walkable.
     void move(char direction, Room* room);
 
-    // Getter functions.
+    // Returns player to the starting position
+    // when entering a new room.
+    void resetPosition();
+
     int getX();
     int getY();
 

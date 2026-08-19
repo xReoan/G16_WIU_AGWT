@@ -47,12 +47,16 @@ private:
     void handleBackpackInput(char input);
     void handlePuzzleInput(char input);
 
-    // Interaction.
+    // Returns Interactable directly
+    // in front of player.
     Interactable* getPlayerInteractable();
 
-    // Checks the MapNode after
-    // the player travels to it.
+    // Activates F / S / B node.
     void activateCurrentMapNode();
+
+    // NEW:
+    // Handles Room 1 -> Room 2 etc.
+    void goToNextRoom();
 
 public:
     Game();
