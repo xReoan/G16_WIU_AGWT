@@ -22,7 +22,9 @@ private:
     // D = Right
     char facingDirection;
 public:
+ 	// Constructor.
 	Player();
+
 	int getmoney();
 	void addmoney(int amount);
 	bool spendmoney(int amount);
@@ -32,9 +34,6 @@ public:
 	void unequiparmor();
 	void equipweapon(item* weapon);
 	void equiparmor(item* armor);
-
-    // Constructor.
-    Player();
 
     // Attempts to move the player one space.
     //
