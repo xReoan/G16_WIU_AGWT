@@ -1,30 +1,34 @@
 #pragma once
 
-// Different objects that the player can interact with.
-enum InteractionType
-{
-    NONE,
-    CARD_TABLE,
-    KEYPAD,
-    EXIT_DOOR
-};
+#include "Interactable.h"
+#include "CardTable.h"
+#include "Puzzle.h"
+#include "KeypadPuzzle.h"
+#include "Door.h"
 
 class Room
 {
 private:
-    // Size of the room.
     static const int WIDTH = 50;
     static const int HEIGHT = 20;
 
-    // Stores the visual layout.
     char roomLayout[HEIGHT][WIDTH];
 
     int roomNumber;
 
-    // Room 1 keypad starts locked.
-    bool keypadUnlocked;
+    // All interactable objects in the room.
+    Interactable* interactables[10];
 
-    // Builds the room.
+    int interactableCount;
+
+    // Direct pointers to important Room 1 objects.
+    KeypadPuzzle* keypad;
+    Door* exitDoor;
+
+    // Adds an interactable to the room.
+    void addInteractable(Interactable* object);
+
+    // Room drawing functions.
     void clearRoom();
     void drawWalls();
     void drawTable();
@@ -34,24 +38,34 @@ private:
 
 public:
     Room();
+    ~Room();
 
-    // Creates all parts of the room.
     void createRoom();
 
-    // Draws the room and temporarily draws the player
-    // at the player's coordinates.
-    void drawRoom(int playerX, int playerY, bool playerSeated);
+    void drawRoom(
+        int playerX,
+        int playerY,
+        bool playerSeated);
 
-    // Checks whether the player is allowed to move
-    // onto a particular position.
+    // Collision detection.
     bool isWalkable(int x, int y);
 
-    // Checks what interactable object exists
-    // at the given position.
-    InteractionType getInteractionAt(int x, int y);
+    // Interaction detection.
+    Interactable* getInteractableAt(
+        int x,
+        int y);
 
     int getRoomNumber();
 
+    // Keypad.
     bool getKeypadUnlocked();
     void setKeypadUnlocked(bool unlocked);
+
+    KeypadPuzzle* getKeypadPuzzle();
+
+    // Door.
+    bool getDoorUnlocked();
+    void setDoorUnlocked(bool unlocked);
+
+    Door* getDoor();
 };

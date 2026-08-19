@@ -4,28 +4,23 @@
 #include <conio.h>
 #include <Windows.h>
 
-// Creates the game.
 Game::Game()
 {
-    // Player begins exploring the room.
     currentState = ROOM_STATE;
 
-    // Clear the screen before the first frame.
+    activePuzzle = nullptr;
+
     screenNeedsClear = true;
 
-    // Generate the branching map once
-    // when the game begins.
     map.generateMap();
 }
 
-// Moves the console cursor back to coordinate (0, 0).
-//
-// This means the new frame overwrites the previous frame
-// rather than appearing underneath it.
+// Moves cursor back to top-left.
 void Game::moveCursorToTop()
 {
     HANDLE consoleHandle =
-        GetStdHandle(STD_OUTPUT_HANDLE);
+        GetStdHandle(
+            STD_OUTPUT_HANDLE);
 
     COORD cursorPosition;
 
@@ -37,14 +32,15 @@ void Game::moveCursorToTop()
         cursorPosition);
 }
 
-// Completely clears everything currently
-// shown in the console.
+// Completely clears console.
 void Game::clearScreen()
 {
     HANDLE consoleHandle =
-        GetStdHandle(STD_OUTPUT_HANDLE);
+        GetStdHandle(
+            STD_OUTPUT_HANDLE);
 
-    CONSOLE_SCREEN_BUFFER_INFO screenInfo;
+    CONSOLE_SCREEN_BUFFER_INFO
+        screenInfo;
 
     GetConsoleScreenBufferInfo(
         consoleHandle,
@@ -61,8 +57,6 @@ void Game::clearScreen()
     topLeft.X = 0;
     topLeft.Y = 0;
 
-    // Replace everything currently displayed
-    // with blank spaces.
     FillConsoleOutputCharacter(
         consoleHandle,
         ' ',
@@ -70,7 +64,6 @@ void Game::clearScreen()
         topLeft,
         &charactersWritten);
 
-    // Reset the console formatting.
     FillConsoleOutputAttribute(
         consoleHandle,
         screenInfo.wAttributes,
@@ -78,18 +71,16 @@ void Game::clearScreen()
         topLeft,
         &charactersWritten);
 
-    // Return cursor to the top-left.
     SetConsoleCursorPosition(
         consoleHandle,
         topLeft);
 }
 
-// Main game loop.
+// Main loop.
 void Game::run()
 {
     while (true)
     {
-        // Completely clear only when changing screens.
         if (screenNeedsClear == true)
         {
             clearScreen();
@@ -98,30 +89,25 @@ void Game::run()
         }
         else
         {
-            // During normal movement, just return
-            // to the top-left.
-            //
-            // This gives much smoother movement
-            // than clearing the entire console.
             moveCursorToTop();
         }
 
-        // Draw the current screen.
         draw();
 
-        // Read one key immediately.
-        char input = _getch();
+        char input =
+            _getch();
 
-        // Let the current state decide
-        // what the key does.
         handleInput(input);
     }
 }
 
-// Draws whichever UI belongs
-// to the current GameState.
+// Draws current state.
 void Game::draw()
 {
+    // ==========================
+    // ROOM
+    // ==========================
+
     if (currentState == ROOM_STATE)
     {
         room.drawRoom(
@@ -130,23 +116,36 @@ void Game::draw()
             false);
     }
 
+    // ==========================
+    // MAP
+    // ==========================
+
     else if (currentState == MAP_STATE)
     {
         map.drawMap();
 
         std::cout << std::endl;
 
-        std::cout << "A - Take Left Path"
+        std::cout
+            << "A / D - Select Path"
             << std::endl;
 
-        std::cout << "D - Take Right Path"
+        std::cout
+            << "E     - Confirm Path"
             << std::endl;
 
-        std::cout << "Q - Stand Up"
+        std::cout
+            << "Q     - Stand Up"
             << std::endl;
     }
 
-    else if (currentState == CARD_BATTLE_STATE)
+    // ==========================
+    // FIGHT
+    // ==========================
+
+    else if (
+        currentState ==
+        CARD_BATTLE_STATE)
     {
         std::cout
             << "================ CARD BATTLE ================"
@@ -154,20 +153,118 @@ void Game::draw()
 
         std::cout << std::endl;
 
+        if (map.isAtFinalNode() == true)
+        {
+            std::cout
+                << "BOSS BATTLE"
+                << std::endl;
+        }
+        else
+        {
+            std::cout
+                << "Enemy Encounter"
+                << std::endl;
+        }
+
+        std::cout << std::endl;
+
         std::cout
-            << "Card Battle UI will go here."
+            << "Card Battle system will go here."
+            << std::endl;
+
+        std::cout << std::endl;
+
+        // Temporary testing control.
+        std::cout
+            << "E - Win Battle (TEST)"
+            << std::endl;
+    }
+
+    // ==========================
+    // SHOP
+    // ==========================
+
+    else if (
+        currentState ==
+        SHOP_STATE)
+    {
+        std::cout
+            << "================ ITEM SHOP ================"
             << std::endl;
 
         std::cout << std::endl;
 
         std::cout
-            << "Q - Leave Battle"
+            << "A strange merchant waits behind the counter."
             << std::endl;
+
+        std::cout << std::endl;
+
+        std::cout
+            << "Shop system will go here later."
+            << std::endl;
+
+        std::cout << std::endl;
+
+        std::cout
+            << "Q - Leave Shop"
+            << std::endl;
+    }
+
+    // ==========================
+    // BACKPACK
+    // ==========================
+
+    else if (
+        currentState ==
+        BACKPACK_STATE)
+    {
+        std::cout
+            << "================ BACKPACK ================"
+            << std::endl;
+
+        std::cout << std::endl;
+
+        std::cout
+            << "You find an abandoned backpack."
+            << std::endl;
+
+        std::cout << std::endl;
+
+        std::cout
+            << "Something useful may be inside."
+            << std::endl;
+
+        std::cout << std::endl;
+
+        std::cout
+            << "E - Take Item"
+            << std::endl;
+
+        std::cout
+            << "Q - Leave"
+            << std::endl;
+    }
+
+    // ==========================
+    // PUZZLE
+    // ==========================
+
+    else if (
+        currentState ==
+        PUZZLE_STATE)
+    {
+        if (activePuzzle != nullptr)
+        {
+            // Polymorphism.
+            activePuzzle->draw();
+        }
     }
 }
 
-// Sends controls to the correct state.
-void Game::handleInput(char input)
+// Sends input to correct state.
+void Game::handleInput(
+    char input)
 {
     if (currentState == ROOM_STATE)
     {
@@ -179,178 +276,472 @@ void Game::handleInput(char input)
         handleMapInput(input);
     }
 
-    else if (currentState == CARD_BATTLE_STATE)
+    else if (
+        currentState ==
+        CARD_BATTLE_STATE)
     {
-        // Temporary testing control.
-        if (input == 'Q' || input == 'q')
-        {
-            currentState = MAP_STATE;
+        handleCardBattleInput(input);
+    }
 
-            screenNeedsClear = true;
+    else if (
+        currentState ==
+        SHOP_STATE)
+    {
+        handleShopInput(input);
+    }
+
+    else if (
+        currentState ==
+        BACKPACK_STATE)
+    {
+        handleBackpackInput(input);
+    }
+
+    else if (
+        currentState ==
+        PUZZLE_STATE)
+    {
+        handlePuzzleInput(input);
+    }
+}
+
+// Room controls.
+void Game::handleRoomInput(
+    char input)
+{
+    // Movement.
+    if (input == 'W' ||
+        input == 'w' ||
+        input == 'A' ||
+        input == 'a' ||
+        input == 'S' ||
+        input == 's' ||
+        input == 'D' ||
+        input == 'd')
+    {
+        player.move(
+            input,
+            &room);
+    }
+
+    // Interaction.
+    else if (
+        input == 'E' ||
+        input == 'e')
+    {
+        Interactable* object =
+            getPlayerInteractable();
+
+        if (object != nullptr)
+        {
+            // POLYMORPHISM.
+            InteractionResult result =
+                object->interact();
+
+            // Card Table.
+            if (result == OPEN_MAP)
+            {
+                std::cout << std::endl;
+
+                std::cout
+                    << "Are you sure you want to sit down? [Y/N] ";
+
+                char choice =
+                    _getch();
+
+                if (choice == 'Y' ||
+                    choice == 'y')
+                {
+                    currentState =
+                        MAP_STATE;
+                }
+
+                screenNeedsClear =
+                    true;
+            }
+
+            // Puzzle.
+            else if (
+                result ==
+                OPEN_PUZZLE)
+            {
+                activePuzzle =
+                    room.getKeypadPuzzle();
+
+                room.getKeypadPuzzle()->
+                    clearEnteredCode();
+
+                activePuzzle->
+                    setExitRequested(false);
+
+                currentState =
+                    PUZZLE_STATE;
+
+                screenNeedsClear =
+                    true;
+            }
+
+            // Door.
+            else if (
+                result ==
+                OPEN_DOOR)
+            {
+                std::cout << std::endl;
+
+                std::cout
+                    << "The door opens."
+                    << std::endl;
+
+                std::cout
+                    << "Room 1 complete!"
+                    << std::endl;
+
+                _getch();
+
+                screenNeedsClear =
+                    true;
+            }
+
+            // Locked object.
+            else if (
+                result ==
+                LOCKED)
+            {
+                std::cout << std::endl;
+
+                std::cout
+                    << "It is currently locked."
+                    << std::endl;
+
+                _getch();
+
+                screenNeedsClear =
+                    true;
+            }
         }
     }
 }
 
-// Handles controls while exploring the room.
-void Game::handleRoomInput(char input)
+// Finds interactable directly
+// in front of Player.
+Interactable* Game::getPlayerInteractable()
 {
-    // WASD movement.
-    if (input == 'W' || input == 'w' ||
-        input == 'A' || input == 'a' ||
-        input == 'S' || input == 's' ||
-        input == 'D' || input == 'd')
-    {
-        player.move(input, &room);
-    }
+    int interactionX =
+        player.getX();
 
-    // E = Interact.
-    else if (input == 'E' || input == 'e')
-    {
-        InteractionType interaction =
-            getPlayerInteraction();
-
-        // CARD TABLE
-        if (interaction == CARD_TABLE)
-        {
-            std::cout << std::endl;
-
-            std::cout
-                << "Are you sure you want to sit down? [Y/N] ";
-
-            char choice = _getch();
-
-            if (choice == 'Y' || choice == 'y')
-            {
-                // Switch from Room UI
-                // to the branching Map UI.
-                currentState = MAP_STATE;
-
-                // Completely clear the old Room UI
-                // before displaying the map.
-                screenNeedsClear = true;
-            }
-            else
-            {
-                screenNeedsClear = true;
-            }
-        }
-
-        // KEYPAD
-        else if (interaction == KEYPAD)
-        {
-            std::cout << std::endl;
-
-            if (room.getKeypadUnlocked() == true)
-            {
-                std::cout
-                    << "The keypad is active."
-                    << std::endl;
-
-                // Keypad puzzle state will go here later.
-            }
-            else
-            {
-                std::cout
-                    << "The keypad has no power."
-                    << std::endl;
-            }
-
-            _getch();
-
-            screenNeedsClear = true;
-        }
-
-        // EXIT DOOR
-        else if (interaction == EXIT_DOOR)
-        {
-            std::cout << std::endl;
-
-            std::cout
-                << "The door is locked."
-                << std::endl;
-
-            _getch();
-
-            screenNeedsClear = true;
-        }
-    }
-}
-
-// Finds which object is directly
-// in front of the player.
-InteractionType Game::getPlayerInteraction()
-{
-    int interactionX = player.getX();
-    int interactionY = player.getY();
+    int interactionY =
+        player.getY();
 
     char direction =
         player.getFacingDirection();
 
-    // Position directly above player.
     if (direction == 'W')
     {
-        interactionY = interactionY - 1;
+        interactionY--;
     }
 
-    // Position directly below player.
     else if (direction == 'S')
     {
-        interactionY = interactionY + 1;
+        interactionY++;
     }
 
-    // Position directly left of player.
     else if (direction == 'A')
     {
-        interactionX = interactionX - 1;
+        interactionX--;
     }
 
-    // Position directly right of player.
     else if (direction == 'D')
     {
-        interactionX = interactionX + 1;
+        interactionX++;
     }
 
-    return room.getInteractionAt(
+    return room.getInteractableAt(
         interactionX,
         interactionY);
 }
 
-// Handles controls while sitting at the table
-// and viewing the branching map.
-void Game::handleMapInput(char input)
+// ================================
+// MAP CONTROLS
+// ================================
+
+void Game::handleMapInput(
+    char input)
 {
-    // Take left branch.
-    if (input == 'A' || input == 'a')
+    // A selects left.
+    if (input == 'A' ||
+        input == 'a')
     {
-        map.travelLeft();
-
-        screenNeedsClear = true;
+        map.selectLeft();
     }
 
-    // Take right branch.
-    else if (input == 'D' || input == 'd')
+    // D selects right.
+    else if (
+        input == 'D' ||
+        input == 'd')
     {
-        map.travelRight();
-
-        screenNeedsClear = true;
+        map.selectRight();
     }
 
-    // Stand up from the table.
-    else if (input == 'Q' || input == 'q')
+    // E confirms selected path.
+    else if (
+        input == 'E' ||
+        input == 'e')
+    {
+        // Only continue if a valid
+        // path was actually selected.
+        if (map.travelSelected() == true)
+        {
+            activateCurrentMapNode();
+
+            screenNeedsClear =
+                true;
+        }
+    }
+
+    // Q stands up.
+    else if (
+        input == 'Q' ||
+        input == 'q')
     {
         std::cout << std::endl;
 
         std::cout
             << "Are you sure you want to stand up? [Y/N] ";
 
-        char choice = _getch();
+        char choice =
+            _getch();
 
-        if (choice == 'Y' || choice == 'y')
+        if (choice == 'Y' ||
+            choice == 'y')
         {
-            // Return to room exploration.
-            currentState = ROOM_STATE;
+            currentState =
+                ROOM_STATE;
         }
 
-        screenNeedsClear = true;
+        screenNeedsClear =
+            true;
+    }
+}
+
+// Checks which node the player
+// just travelled onto.
+void Game::activateCurrentMapNode()
+{
+    MapNode* node =
+        map.getCurrentNode();
+
+    if (node == nullptr)
+    {
+        return;
+    }
+
+    NodeType type =
+        node->getType();
+
+    // Fight.
+    if (type == FIGHT)
+    {
+        currentState =
+            CARD_BATTLE_STATE;
+    }
+
+    // Shop.
+    else if (type == SHOP)
+    {
+        currentState =
+            SHOP_STATE;
+    }
+
+    // Backpack.
+    else if (type == BACKPACK)
+    {
+        currentState =
+            BACKPACK_STATE;
+    }
+}
+
+// ================================
+// CARD BATTLE
+// ================================
+
+void Game::handleCardBattleInput(
+    char input)
+{
+    // TEMPORARY:
+    //
+    // Press E to pretend the player
+    // won the battle.
+    if (input == 'E' ||
+        input == 'e')
+    {
+        // If this was the final node,
+        // treat it as Room 1's boss.
+        if (map.isAtFinalNode() == true)
+        {
+            // Boss defeated!
+            room.setKeypadUnlocked(true);
+
+            clearScreen();
+
+            std::cout
+                << "================ BOSS DEFEATED ================"
+                << std::endl;
+
+            std::cout << std::endl;
+
+            std::cout
+                << "The enemy falls."
+                << std::endl;
+
+            std::cout << std::endl;
+
+            std::cout
+                << "Somewhere behind you..."
+                << std::endl;
+
+            std::cout
+                << "you remember the code: '9743'"
+                << std::endl;
+
+            std::cout << std::endl;
+
+            std::cout
+                << "Press any key to continue."
+                << std::endl;
+
+            _getch();
+        }
+
+        // Return to progression map.
+        currentState =
+            MAP_STATE;
+
+        screenNeedsClear =
+            true;
+    }
+}
+
+// ================================
+// SHOP
+// ================================
+
+void Game::handleShopInput(
+    char input)
+{
+    if (input == 'Q' ||
+        input == 'q')
+    {
+        currentState =
+            MAP_STATE;
+
+        screenNeedsClear =
+            true;
+    }
+}
+
+// ================================
+// BACKPACK
+// ================================
+
+void Game::handleBackpackInput(
+    char input)
+{
+    // Temporary item collection.
+    if (input == 'E' ||
+        input == 'e')
+    {
+        std::cout << std::endl;
+
+        std::cout
+            << "You take the item from the backpack."
+            << std::endl;
+
+        std::cout
+            << "Inventory system will be added later."
+            << std::endl;
+
+        _getch();
+
+        currentState =
+            MAP_STATE;
+
+        screenNeedsClear =
+            true;
+    }
+
+    // Leave without taking item.
+    else if (
+        input == 'Q' ||
+        input == 'q')
+    {
+        currentState =
+            MAP_STATE;
+
+        screenNeedsClear =
+            true;
+    }
+}
+
+// ================================
+// PUZZLE
+// ================================
+
+void Game::handlePuzzleInput(
+    char input)
+{
+    if (activePuzzle != nullptr)
+    {
+        activePuzzle->
+            handleInput(input);
+
+        // Puzzle solved.
+        if (activePuzzle->
+            getSolved() == true)
+        {
+            room.setDoorUnlocked(true);
+
+            clearScreen();
+
+            activePuzzle->draw();
+
+            std::cout << std::endl;
+
+            std::cout
+                << "The exit door has been unlocked."
+                << std::endl;
+
+            std::cout
+                << "Press any key to continue."
+                << std::endl;
+
+            _getch();
+
+            currentState =
+                ROOM_STATE;
+
+            activePuzzle =
+                nullptr;
+
+            screenNeedsClear =
+                true;
+        }
+
+        // Q pressed.
+        else if (
+            activePuzzle->
+            getExitRequested() == true)
+        {
+            activePuzzle->
+                setExitRequested(false);
+
+            currentState =
+                ROOM_STATE;
+
+            activePuzzle =
+                nullptr;
+
+            screenNeedsClear =
+                true;
+        }
     }
 }
