@@ -27,7 +27,6 @@ int main()
 	system("cls");
 	
     //then the fuctions below
-	return 0;
     
     Map* gameMap = new Map();
 
