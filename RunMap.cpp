@@ -27,7 +27,7 @@ Map::~Map()
     }
 }
 
-// Creates a basic branching test map.
+// Generates the map
 //
 //             [F]
 //            /   \
@@ -125,10 +125,12 @@ void Map::drawMap()
     std::cout << "            [YOU]" << std::endl;
 
     std::cout << std::endl;
-
+    
+    std::cout << "Legend:" << std::endl;
     std::cout << "F = Fight" << std::endl;
     std::cout << "S = Shop" << std::endl;
     std::cout << "B = Backpack" << std::endl;
+    std::cout << "===============================" << std::endl;
 
     std::cout << "Q = Stand Up From Table" << std::endl;
 }

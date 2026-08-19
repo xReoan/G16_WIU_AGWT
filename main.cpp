@@ -1,9 +1,13 @@
-#include "RunMap.h"
-#include <iostream>
+#include "Game.h"
+
 #include <cstdlib>
+#include <ctime>
 
 int main()
 {
+    // Gives rand() a different seed
+    // whenever the program starts.
+    srand(time(0));
     //start screen
         std::cout << R"(
  _______    _______  _______  __   __  _______    _     _  ___   _______  __   __ 
@@ -30,11 +34,9 @@ int main()
     
     Map* gameMap = new Map();
 
-    gameMap->generateMap();
-    gameMap->drawMap();
+    Game game;
 
-    delete gameMap;
-    gameMap = nullptr;
+    game.run();
 
     return 0;
 }
