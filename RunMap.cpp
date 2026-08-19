@@ -1,20 +1,22 @@
 #include "RunMap.h"
+
 #include <iostream>
 
-// Creates an empty map.
 Map::Map()
 {
     nodeCount = 0;
+
     currentNode = nullptr;
 
-    // Make sure every pointer starts as nullptr.
+    selectedPath = NO_PATH;
+
     for (int i = 0; i < 7; i++)
     {
         nodes[i] = nullptr;
     }
 }
 
-// Deletes all dynamically created nodes.
+// Deletes all map nodes.
 Map::~Map()
 {
     for (int i = 0; i < nodeCount; i++)
@@ -22,57 +24,77 @@ Map::~Map()
         if (nodes[i] != nullptr)
         {
             delete nodes[i];
+
             nodes[i] = nullptr;
         }
     }
+
+    currentNode = nullptr;
 }
 
-// Generates the map
-//
-//             [F]
-//            /   \
-//          [S]   [F]
-//            \   /
-//             [B]
-//            /   \
-//          [F]   [S]
-//            \   /
-//           [START]
+// Generates Room 1's progression map.
 void Map::generateMap()
 {
-    // The first node is always a Fight.
-    // This prevents the player from immediately
-    // starting at a Shop or Backpack.
-    nodes[0] = new MapNode(FIGHT, 400, 500);
+    // Starting node.
+    nodes[0] =
+        new MapNode(
+            FIGHT,
+            400,
+            500);
 
     // Second row.
-    nodes[1] = new MapNode(
-        mapRNG.generateNodeType(), 300, 400);
+    nodes[1] =
+        new MapNode(
+            mapRNG.generateNodeType(),
+            300,
+            400);
 
-    nodes[2] = new MapNode(
-        mapRNG.generateNodeType(), 500, 400);
+    nodes[2] =
+        new MapNode(
+            mapRNG.generateNodeType(),
+            500,
+            400);
 
     // Middle node.
-    nodes[3] = new MapNode(
-        mapRNG.generateNodeType(), 400, 300);
+    nodes[3] =
+        new MapNode(
+            mapRNG.generateNodeType(),
+            400,
+            300);
 
     // Fourth row.
-    nodes[4] = new MapNode(
-        mapRNG.generateNodeType(), 300, 200);
+    nodes[4] =
+        new MapNode(
+            mapRNG.generateNodeType(),
+            300,
+            200);
 
-    nodes[5] = new MapNode(
-        mapRNG.generateNodeType(), 500, 200);
+    nodes[5] =
+        new MapNode(
+            mapRNG.generateNodeType(),
+            500,
+            200);
 
-    // Final node is always a Fight.
-    nodes[6] = new MapNode(FIGHT, 400, 100);
+    // Final node is always Fight.
+    //
+    // Later this will become the Boss.
+    nodes[6] =
+        new MapNode(
+            FIGHT,
+            400,
+            100);
 
     nodeCount = 7;
 
-    // Connect the first node to both branches.
+    // --------------------------
+    // CONNECT PATHS
+    // --------------------------
+
+    // Start splits.
     nodes[0]->setLeftPath(nodes[1]);
     nodes[0]->setRightPath(nodes[2]);
 
-    // Merge into the middle.
+    // Merge.
     nodes[1]->setRightPath(nodes[3]);
     nodes[2]->setLeftPath(nodes[3]);
 
@@ -80,87 +102,260 @@ void Map::generateMap()
     nodes[3]->setLeftPath(nodes[4]);
     nodes[3]->setRightPath(nodes[5]);
 
-    // Merge into the final Fight.
+    // Merge at final node.
     nodes[4]->setRightPath(nodes[6]);
     nodes[5]->setLeftPath(nodes[6]);
 
-    // Start at the bottom.
+    // Start player at first node.
     currentNode = nodes[0];
 
     currentNode->setVisited(true);
+
+    selectedPath = NO_PATH;
 }
 
+// Draws the map.
 void Map::drawMap()
 {
+    std::cout
+        << "================ MAP ================"
+        << std::endl;
+
     std::cout << std::endl;
 
-    std::cout << "             ["
+    std::cout
+        << "                   ["
         << nodes[6]->getSymbol()
-        << "]" << std::endl;
+        << "]"
+        << std::endl;
 
-    std::cout << "            /   \\" << std::endl;
+    std::cout
+        << "                  /   \\"
+        << std::endl;
 
-    std::cout << "          ["
+    std::cout
+        << "                ["
         << nodes[4]->getSymbol()
         << "]   ["
         << nodes[5]->getSymbol()
-        << "]" << std::endl;
+        << "]"
+        << std::endl;
 
-    std::cout << "            \\   /" << std::endl;
+    std::cout
+        << "                  \\   /"
+        << std::endl;
 
-    std::cout << "             ["
+    std::cout
+        << "                   ["
         << nodes[3]->getSymbol()
-        << "]" << std::endl;
+        << "]"
+        << std::endl;
 
-    std::cout << "            /   \\" << std::endl;
+    std::cout
+        << "                  /   \\"
+        << std::endl;
 
-    std::cout << "          ["
+    std::cout
+        << "                ["
         << nodes[1]->getSymbol()
         << "]   ["
         << nodes[2]->getSymbol()
-        << "]" << std::endl;
+        << "]"
+        << std::endl;
 
-    std::cout << "            \\   /" << std::endl;
+    std::cout
+        << "                  \\   /"
+        << std::endl;
 
-    std::cout << "            [YOU]" << std::endl;
+    std::cout
+        << "                 [START]"
+        << std::endl;
 
     std::cout << std::endl;
-    
-    std::cout << "Legend:" << std::endl;
-    std::cout << "F = Fight" << std::endl;
-    std::cout << "S = Shop" << std::endl;
-    std::cout << "B = Backpack" << std::endl;
-    std::cout << "===============================" << std::endl;
 
-    std::cout << "Q = Stand Up From Table" << std::endl;
+    std::cout << "Legend:" << std::endl;
+
+    std::cout
+        << "F = Fight"
+        << std::endl;
+
+    std::cout
+        << "S = Shop"
+        << std::endl;
+
+    std::cout
+        << "B = Backpack"
+        << std::endl;
+
+    std::cout << std::endl;
+
+    // --------------------------
+    // CURRENT NODE
+    // --------------------------
+
+    if (currentNode != nullptr)
+    {
+        std::cout
+            << "Current Node: ["
+            << currentNode->getSymbol()
+            << "]"
+            << std::endl;
+    }
+
+    std::cout << std::endl;
+
+    // --------------------------
+    // LEFT OPTION
+    // --------------------------
+
+    if (currentNode != nullptr &&
+        currentNode->getLeftPath() != nullptr)
+    {
+        if (selectedPath == LEFT_PATH)
+        {
+            std::cout
+                << "Left:  >["
+                << currentNode->
+                getLeftPath()->
+                getSymbol()
+                << "]"
+                << std::endl;
+        }
+        else
+        {
+            std::cout
+                << "Left:   ["
+                << currentNode->
+                getLeftPath()->
+                getSymbol()
+                << "]"
+                << std::endl;
+        }
+    }
+    else
+    {
+        std::cout
+            << "Left:   No Path"
+            << std::endl;
+    }
+
+    // --------------------------
+    // RIGHT OPTION
+    // --------------------------
+
+    if (currentNode != nullptr &&
+        currentNode->getRightPath() != nullptr)
+    {
+        if (selectedPath == RIGHT_PATH)
+        {
+            std::cout
+                << "Right: >["
+                << currentNode->
+                getRightPath()->
+                getSymbol()
+                << "]"
+                << std::endl;
+        }
+        else
+        {
+            std::cout
+                << "Right:  ["
+                << currentNode->
+                getRightPath()->
+                getSymbol()
+                << "]"
+                << std::endl;
+        }
+    }
+    else
+    {
+        std::cout
+            << "Right:  No Path"
+            << std::endl;
+    }
 }
 
-// Returns the node the player is currently standing on.
+// Selects left path.
+void Map::selectLeft()
+{
+    if (currentNode != nullptr &&
+        currentNode->getLeftPath() != nullptr)
+    {
+        selectedPath = LEFT_PATH;
+    }
+}
+
+// Selects right path.
+void Map::selectRight()
+{
+    if (currentNode != nullptr &&
+        currentNode->getRightPath() != nullptr)
+    {
+        selectedPath = RIGHT_PATH;
+    }
+}
+
+// Returns whichever node is selected.
+MapNode* Map::getSelectedNode()
+{
+    if (currentNode == nullptr)
+    {
+        return nullptr;
+    }
+
+    if (selectedPath == LEFT_PATH)
+    {
+        return currentNode->getLeftPath();
+    }
+
+    else if (selectedPath == RIGHT_PATH)
+    {
+        return currentNode->getRightPath();
+    }
+
+    return nullptr;
+}
+
+// Confirms selected path.
+bool Map::travelSelected()
+{
+    MapNode* destination =
+        getSelectedNode();
+
+    // No valid path selected.
+    if (destination == nullptr)
+    {
+        return false;
+    }
+
+    // Move to selected node.
+    currentNode = destination;
+
+    currentNode->setVisited(true);
+
+    // Clear selection after travelling.
+    selectedPath = NO_PATH;
+
+    return true;
+}
+
 MapNode* Map::getCurrentNode()
 {
     return currentNode;
 }
 
-// Travels along the current node's left path.
-void Map::travelLeft()
+PathChoice Map::getSelectedPath()
 {
-    if (currentNode != nullptr &&
-        currentNode->getLeftPath() != nullptr)
-    {
-        currentNode = currentNode->getLeftPath();
-
-        currentNode->setVisited(true);
-    }
+    return selectedPath;
 }
 
-// Travels along the current node's right path.
-void Map::travelRight()
+// Final node is nodes[6].
+bool Map::isAtFinalNode()
 {
-    if (currentNode != nullptr &&
-        currentNode->getRightPath() != nullptr)
+    if (currentNode == nodes[6])
     {
-        currentNode = currentNode->getRightPath();
-
-        currentNode->setVisited(true);
+        return true;
     }
+
+    return false;
 }

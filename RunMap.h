@@ -1,41 +1,64 @@
 #pragma once
+
 #include "MapNode.h"
 #include "MapRNG.h"
+
+// Stores which path the player
+// is currently selecting.
+enum PathChoice
+{
+    NO_PATH,
+    LEFT_PATH,
+    RIGHT_PATH
+};
 
 class Map
 {
 private:
-    // Stores all nodes currently in the map.
     MapNode* nodes[7];
 
-    // Number of nodes currently created.
     int nodeCount;
 
-    // Stores the node the player is currently standing on.
+    // Node the player is currently standing on.
     MapNode* currentNode;
 
+    // Path currently highlighted by A/D.
+    PathChoice selectedPath;
+
+    // Generates random node types.
     MapRNG mapRNG;
 
 public:
-    // Constructor.
     Map();
 
-    // Destructor.
-    // Deletes all dynamically created MapNode objects.
     ~Map();
 
-    // Creates a rand map.
+    // Creates the randomized map.
     void generateMap();
 
-    // Draws the map in the console.
+    // Draws the map.
     void drawMap();
 
-    // Returns the player's current node.
+    // Selects a path without travelling yet.
+    void selectLeft();
+    void selectRight();
+
+    // Travels along the currently selected path.
+    //
+    // Returns true if movement happened.
+    bool travelSelected();
+
+    // Returns the node currently selected.
+    MapNode* getSelectedNode();
+
+    // Returns the node the player
+    // is currently standing on.
     MapNode* getCurrentNode();
 
-    // Moves the player along the left path.
-    void travelLeft();
+    // Returns selected path.
+    PathChoice getSelectedPath();
 
-    // Moves the player along the right path.
-    void travelRight();
+    // Checks whether player reached
+    // the final node.
+    bool isAtFinalNode();
 };
