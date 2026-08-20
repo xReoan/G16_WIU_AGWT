@@ -15,7 +15,7 @@ void inv::OpenInv() const
 {
     for (int i = 0; i < 16; i++) {
         if (inv::invinside[i] != -1 ) {
-            std::cout << i + 1 << invitem[inv::invinside[i]]->getname() << std::endl;
+            std::cout << i + 1 << ". " << invitem[inv::invinside[i]]->getname() << std::endl;
         }
         else {
             std::cout << i + 1 << ". Empty" << std::endl;
