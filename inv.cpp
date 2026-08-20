@@ -1,46 +1,40 @@
 #include "inv.h"
+#include "item.h"
+#include "itemDatabase.h"
 #include <iostream>
+inv::inv() {
+    std::cout << "bro" << std::endl;
+    for (int i = 0; i < 10;i++) {
+        invitem[i] = database.getitem(i);
+    }
+    std::cout << "GAIN" << std::endl;
+}
 
-char inv::invinside[17][35] = {
-        "_================================_",
-        "||      ||      ||      ||      ||",
-        "||  1   ||  ?   ||  ?   ||  ?   ||",
-        "||      ||      ||      ||      ||",
-        "||==============================||",
-        "||      ||      ||      ||      ||",
-        "||  2   ||  ?   ||  ?   ||  ?   ||",
-        "||      ||      ||      ||      ||",
-        "||==============================||",
-        "||      ||      ||      ||      ||",
-        "||  3   ||  ?   ||  ?   ||  ?   ||",
-        "||      ||      ||      ||      ||",
-        "||==============================||",
-        "||      ||      ||      ||      ||",
-        "||  4   ||  ?   ||  ?   ||  ?   ||",
-        "||      ||      ||      ||      ||",
-        "-================================-"
-};
+//saves the number of the number base on the item database, -1 is none
+int inv::invinside[16] = {0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 
 void inv::OpenInv() const
 {
-    for (int i = 0; i < 17; i++) {
-        for (int j = 0; j < 34; j++) {
-            std::cout << invinside[i][j];
+    std::cout << "hey" << std::endl;
+    for (int i = 0; i < 16; i++) {
+        if (inv::invinside[i] != -1 ) {
+            std::cout << i + 1 << invitem[inv::invinside[i]]->getname() << std::endl;
         }
-        std::cout << std::endl;
+        else {
+            std::cout << i + 1 << ". Empty" << std::endl;
+        }
     }
 }
 
-void inv::RecivedInv(char thing) const
+//takes a int cuz thats how its storied, will be changed
+void inv::RecivedInv(int thing) const
 {
     char changed = 'N';
-    for (int i = 0; i < 17; i++) {
-        for (int j = 0; j < 35; j++) {
-            if (invinside[i][j] == '?') {
-                invinside[i][j] = thing;
-                changed = 'Y';
-                return;
-            }
+    for (int i = 0; i < 16; i++) {
+        if (invinside[i] == '?') {
+            invinside[i] = thing;
+            changed = 'Y';
+            return;
         }
     }
     if (changed != 'Y') {
