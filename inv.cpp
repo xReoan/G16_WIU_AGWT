@@ -3,11 +3,9 @@
 #include "itemDatabase.h"
 #include <iostream>
 inv::inv() {
-    std::cout << "bro" << std::endl;
     for (int i = 0; i < 10;i++) {
         invitem[i] = database.getitem(i);
     }
-    std::cout << "GAIN" << std::endl;
 }
 
 //saves the number of the number base on the item database, -1 is none
@@ -15,7 +13,6 @@ int inv::invinside[16] = {0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 
 void inv::OpenInv() const
 {
-    std::cout << "hey" << std::endl;
     for (int i = 0; i < 16; i++) {
         if (inv::invinside[i] != -1 ) {
             std::cout << i + 1 << invitem[inv::invinside[i]]->getname() << std::endl;
